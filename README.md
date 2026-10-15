@@ -16,6 +16,10 @@ database
 | `help`                                 | справка                |
 | `exit`                                 | выход                  |
 
+### Демонстрация
+
+[![asciicast](https://asciinema.org/a/AOqFDUsGQ7ysPznO.svg)](https://asciinema.org/a/AOqFDUsGQ7ysPznO)
+
 Типы столбцов: `int`, `str`, `bool`. 
 
 Столбец `ID:int` добавляется автоматически.
