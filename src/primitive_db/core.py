@@ -24,3 +24,19 @@ def create_table(metadata: dict, table_name: str, columns: list[str]) -> dict | 
 
     metadata[table_name] = columns
     return metadata
+
+
+def drop_table(metadata: dict, table_name: str) -> dict | None:
+    """
+    Удаляет информацию о таблице
+
+    :param metadata: словарь с таблицами
+    :param table_name: имя таблицы
+    :return: обновленный metadata или None при ошибке
+    """
+    if table_name not in metadata:
+        print(f'Ошибка: Таблица "{table_name}" не существует.')
+        return None
+
+    del metadata[table_name]
+    return metadata
