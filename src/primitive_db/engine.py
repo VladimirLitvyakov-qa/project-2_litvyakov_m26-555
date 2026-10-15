@@ -23,29 +23,31 @@ def print_help():
 
 
 def run():
-    print("Первая попытка запустить проект!")
-    print()
-    print(3 * "*")
-    print("<command> exit - выйти из программы")
-    print("<command> help - справочная информация")
+    print_help()
 
     while True:
         metadata = load_metadata(PATH)
-        user_input = prompt.string(">>>Введите команду: ")
+        user_input = prompt.string('>>>Введите команду: ')
         args = shlex.split(user_input)
 
         match args[0]:
-            case "create_table":
+            case 'create_table':
                 upd_data = create_table(metadata, args[1], args[2:])
                 if upd_data is not None:
                     save_metadata(PATH, upd_data)
-            case "drop_table":
+                    col = ", ".join(metadata[args[1]])
+                    print(f'Таблица "{args[1]}" успешно создана со столбцами: {col}')
+            case 'list_tables':
+                for table in metadata:
+                    print(f"- {table}")
+            case 'drop_table':
                 upd_data = drop_table(metadata, args[1])
                 if upd_data is not None:
                     save_metadata(PATH, upd_data)
-            case "help":
-                print_help()
-            case "exit":
+                    print(f'Таблица "{args[1]}" успешно удалена.')
+            case 'exit':
                 break
+            case 'help':
+                print_help()
             case _:
-                print(f"Функции {args[0]} нет. Попробуйте снова.")
+                print(f'Функции {args[0]} нет. Попробуйте снова.')
