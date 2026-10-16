@@ -31,3 +31,32 @@ def parse_where_and_set(condition: str) -> dict | None:
             pass
 
     return {key: value}
+
+
+def parse_value(value: str) -> str | int | bool | None:
+    """
+    Превращает строку в нужный тип данных
+
+    :param value: строка со значением
+    :return: значение типа str, int или bool, None если строка пустая
+    """
+    if not isinstance(value, str):
+        raise TypeError(f"value must be str, but got {type(value).__name__}")
+
+    if not value:
+        print(f"Некорректное значение: {value}. Попробуйте снова.")
+        return None
+
+    if value[0] == '"' and value[-1] == '"':
+        value = value[1:-1]
+    elif value == "True":
+        value = True
+    elif value == "False":
+        value = False
+    else:
+        try:
+            value = int(value)
+        except ValueError:
+            pass
+
+    return value

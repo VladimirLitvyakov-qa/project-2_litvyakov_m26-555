@@ -1,9 +1,16 @@
 import shlex
 
 import prompt
+from prettytable import PrettyTable
 
-from primitive_db.core import create_table, drop_table
-from primitive_db.utils import load_metadata, save_metadata
+from primitive_db.core import create_table, drop_table, insert, select
+from primitive_db.parser import parse_value, parse_where_and_set
+from primitive_db.utils import (
+    load_metadata,
+    load_table_data,
+    save_metadata,
+    save_table_data,
+)
 
 PATH = "db_meta.json"
 
@@ -11,10 +18,32 @@ PATH = "db_meta.json"
 def print_help() -> None:
     """Печатает вспомогательные сообщения для верного выбора"""
     print("\n***Процесс работы с таблицей***")
-    print("Функции:")
+    print("\nФункции:")
     print("<command> create_table <имя_таблицы> <столбец1:тип> .. - создать таблицу")
     print("<command> list_tables - показать список всех таблиц")
     print("<command> drop_table <имя_таблицы> - удалить таблицу")
+
+    print("\n***Операции с данными***")
+    print("\nФункции:")
+    print(
+        "<command> insert into <имя_таблицы> "
+        "values (<значение1>, <значение2>, ...) - создать запись"
+    )
+    print(
+        "<command> select from <имя_таблицы> where "
+        "<столбец> = <значение> - прочитать записи по условию"
+    )
+    print("<command> select from <имя_таблицы> - прочитать все записи")
+    print(
+        "<command> update <имя_таблицы> set <столбец1> = "
+        "<новое_значение1> where <столбец_условия> = "
+        "<значение_условия> - обновить запись"
+    )
+    print(
+        "<command> delete from <имя_таблицы> where "
+        "<столбец> = <значение> - удалить запись"
+    )
+    print("<command> info <имя_таблицы> - вывести информацию о таблице")
 
     print("\nОбщие команды:")
     print("<command> exit - выход из программы")
@@ -60,6 +89,65 @@ def run() -> None:
                 if upd_data is not None:
                     save_metadata(PATH, upd_data)
                     print(f'Таблица "{args[1]}" успешно удалена.')
+            case "insert":
+                if len(args) < 3:
+                    print("Не указано имя таблицы. Попробуйте снова.")
+                    continue
+
+                start = user_input.find("(")
+                end = user_input.find(")")
+
+                if start == -1 or end == -1 or start >= end:
+                    print("Некорректный формат записи.")
+                    continue
+
+                values = [
+                    parse_value(v.strip())
+                    for v in user_input[start + 1 : end].split(",")
+                ]
+                table_data = insert(metadata, args[2], values)
+
+                if table_data:
+                    save_table_data(args[2], table_data)
+                    print(
+                        f'Запись с ID={table_data[-1]["ID"]} успешно добавлена '
+                        f'в таблицу "{args[2]}".'
+                    )
+            case "select":
+                if len(args) < 3:
+                    print("Не указано имя таблицы. Попробуйте снова.")
+                    continue
+
+                if args[2] not in metadata:
+                    print(f'Ошибка: Таблица "{args[2]}" не существует.')
+                    continue
+
+                table_data = load_table_data(args[2])
+
+                if len(args) > 3 and args[3] == "where":
+                    start = user_input.find("where ") + len("where ")
+                    values = parse_where_and_set(user_input[start:])
+
+                    if values is None:
+                        continue
+
+                    result = select(table_data, values)
+                else:
+                    result = select(table_data)
+
+                table = PrettyTable()
+                table.field_names = [k[: k.find(":")] for k in metadata[args[2]]]
+
+                for row in result:
+                    table.add_row(list(row.values()))
+
+                print(table)
+            case "update":
+                ...
+            case "delete":
+                ...
+            case "info":
+                ...
             case "exit":
                 break
             case "help":
