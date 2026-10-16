@@ -115,7 +115,7 @@ def select(table_data: list[dict], where_clause: dict = None) -> list[dict] | No
 
     :param table_data: таблица с данными
     :param where_clause: условие выборки
-    :return: результирующий список
+    :return: результирующий список или None
     """
     if not isinstance(table_data, list):
         raise TypeError(f"table_data must be list, but got {type(table_data).__name__}")
@@ -139,3 +139,34 @@ def select(table_data: list[dict], where_clause: dict = None) -> list[dict] | No
                 result.append(data)
 
     return result
+
+
+def update(table_data: list[dict], set_clause: dict, where_clause: dict) -> list[dict]:
+    """
+    Находит записи по условию where_clause и обновляет в
+    найденных записях поля согласно set_clause
+
+    :param table_data: таблица с данными
+    :param set_clause: данные для обновления
+    :param where_clause: условия выборки
+    :return: таблица с данными
+    """
+    if not isinstance(table_data, list):
+        raise TypeError(f"table_data must be list, but got {type(table_data).__name__}")
+
+    if not isinstance(set_clause, dict):
+        raise TypeError(f"set_clause must be dict, but got {type(set_clause).__name__}")
+
+    if not isinstance(where_clause, dict):
+        raise TypeError(
+            f"where_clause must be dict, but got {type(where_clause).__name__}"
+        )
+
+    for data in table_data:
+        for k1, v1 in where_clause.items():
+            if data.get(k1) == v1:
+                for k2, v2 in set_clause.items():
+                    if data.get(k2) is not None:
+                        data[k2] = v2
+
+    return table_data
