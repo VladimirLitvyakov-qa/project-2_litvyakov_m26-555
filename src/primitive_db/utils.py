@@ -36,7 +36,7 @@ def save_metadata(filepath: str, data: dict) -> None:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
 
-def load_table_data(table_name: str) -> dict:
+def load_table_data(table_name: str) -> list:
     """
     Загружает данные из JSON-файла
 
@@ -52,23 +52,23 @@ def load_table_data(table_name: str) -> dict:
         with open(f"./data/{table_name}.json", encoding="utf-8") as f:
             return json.load(f)
     except FileNotFoundError:
-        return {}
+        return []
 
 
-def save_table_data(table_name, data) -> None:
+def save_table_data(table_name: str, data: list) -> None:
     """
     Сохраняет переданные данные в JSON-файл
 
     :param table_name: название таблицы
-    :param data: словарь
+    :param data: список
     """
     if not isinstance(table_name, str):
         raise TypeError(
             f"table_name must be string, but got {type(table_name).__name__}"
         )
 
-    if not isinstance(data, dict):
-        raise TypeError(f"data must be dict, but got {type(data).__name__}")
+    if not isinstance(data, list):
+        raise TypeError(f"data must be list, but got {type(data).__name__}")
 
     folder_path = Path("data")
     folder_path.mkdir(parents=True, exist_ok=True)
