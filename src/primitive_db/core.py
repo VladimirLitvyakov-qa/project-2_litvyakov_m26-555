@@ -106,3 +106,36 @@ def insert(metadata: dict, table_name: str, values: list) -> list | None:
     result_row = {"ID": new_id} | new_row
     table_data.append(result_row)
     return table_data
+
+
+def select(table_data: list[dict], where_clause: dict = None) -> list[dict] | None:
+    """
+    Возвращает данные по условию where_clause, если данные отсутствуют,
+    возвращает все данные
+
+    :param table_data: таблица с данными
+    :param where_clause: условие выборки
+    :return: результирующий список
+    """
+    if not isinstance(table_data, list):
+        raise TypeError(f"table_data must be list, but got {type(table_data).__name__}")
+
+    if where_clause is None:
+        return table_data
+
+    if not isinstance(where_clause, dict):
+        raise TypeError(
+            f"where_clause must be dict, but got {type(where_clause).__name__}"
+        )
+
+    if len(where_clause) > 1:
+        print(f"Некорректное значение: {where_clause}. Попробуйте снова.")
+        return None
+
+    result = []
+    for data in table_data:
+        for key, value in where_clause.items():
+            if data.get(key) == value:
+                result.append(data)
+
+    return result
