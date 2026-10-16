@@ -170,3 +170,29 @@ def update(table_data: list[dict], set_clause: dict, where_clause: dict) -> list
                         data[k2] = v2
 
     return table_data
+
+
+def delete(table_data: list, where_clause: dict) -> list:
+    """
+    Находит записи по where_clause и удаляет их
+
+    :param table_data: таблица с данными
+    :param where_clause: условия для выборки
+    :return: таблица с данными
+    """
+    if not isinstance(table_data, list):
+        raise TypeError(f"table_data must be list, but got {type(table_data).__name__}")
+
+    if not isinstance(where_clause, dict):
+        raise TypeError(
+            f"where_clause must be dict, but got {type(where_clause).__name__}"
+        )
+
+    result = []
+    for data in table_data:
+        for key, value in where_clause.items():
+            if data.get(key) == value:
+                continue
+            result.append(data)
+
+    return result
