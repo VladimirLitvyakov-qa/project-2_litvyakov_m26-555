@@ -18,7 +18,7 @@ database
 
 ### Демонстрация
 
-[![asciicast](https://asciinema.org/a/AOqFDUsGQ7ysPznO.png)](https://asciinema.org/a/AOqFDUsGQ7ysPznO)
+[Демонстрация в asciinema](https://asciinema.org/a/AOqFDUsGQ7ysPznO)
 
 Типы столбцов: `int`, `str`, `bool`. 
 
@@ -55,7 +55,7 @@ database
 
 ### Демонстрация
 
-[![asciicast](https://asciinema.org/a/KwHJTV4uUmLGoIQ7.png)](https://asciinema.org/a/KwHJTV4uUmLGoIQ7)
+[Демонстрация в asciinema](https://asciinema.org/a/KwHJTV4uUmLGoIQ7)
 
 Строковые значения пишутся в кавычках: `"Sergei"`. Числа и `true`/`false` — без кавычек.
 
