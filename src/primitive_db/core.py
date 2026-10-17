@@ -1,4 +1,4 @@
-from decorators import confirm_action, handle_db_errors
+from decorators import confirm_action, handle_db_errors, log_time
 from primitive_db.utils import load_table_data
 
 
@@ -63,6 +63,7 @@ def drop_table(metadata: dict, table_name: str) -> dict | None:
     return metadata
 
 
+@log_time
 @handle_db_errors
 def insert(metadata: dict, table_name: str, values: list) -> list | None:
     """
@@ -107,6 +108,7 @@ def insert(metadata: dict, table_name: str, values: list) -> list | None:
     return table_data
 
 
+@log_time
 @handle_db_errors
 def select(table_data: list[dict], where_clause: dict = None) -> list[dict] | None:
     """

@@ -79,6 +79,10 @@ def run() -> None:
                     col = ", ".join(metadata[args[1]])
                     print(f'Таблица "{args[1]}" успешно создана со столбцами: {col}')
             case "list_tables":
+                if not metadata:
+                    print("Таблицы отсутствуют")
+                    continue
+
                 for table in metadata:
                     print(f"- {table}")
             case "drop_table":

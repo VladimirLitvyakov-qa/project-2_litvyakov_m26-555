@@ -1,3 +1,4 @@
+import time
 from collections.abc import Callable
 from functools import wraps
 from typing import Any
@@ -41,7 +42,7 @@ def confirm_action(action_name: str) -> Callable:
     def decorator(func: Callable) -> Callable:
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
-            answer = input(f'Вы уверены, что хотите выполнить "{action_name}"? [y/n]:')
+            answer = input(f'Вы уверены, что хотите выполнить "{action_name}"? [y/n]: ')
             if answer == "y":
                 return func(*args, **kwargs)
             print("Операция отменена")
@@ -50,3 +51,23 @@ def confirm_action(action_name: str) -> Callable:
         return wrapper
 
     return decorator
+
+
+def log_time(func: Callable) -> Callable:
+    """
+    Замеряет время выполнения функции
+
+    :param func: функция
+    :return: обёрнутая функция
+    """
+
+    @wraps(func)
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
+        start = time.monotonic()
+        result = func(*args, **kwargs)
+        end = time.monotonic()
+        elapsed = end - start
+        print(f"Функция {func.__name__} выполнилась за {elapsed:.3f} секунд.")
+        return result
+
+    return wrapper
