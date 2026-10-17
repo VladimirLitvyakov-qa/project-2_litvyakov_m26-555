@@ -227,7 +227,21 @@ def run() -> None:
                         f'из таблицы "{table_name}".'
                     )
             case "info":
-                ...
+                if len(args) < 2:
+                    print("Не указано имя таблицы. Попробуйте снова.")
+                    continue
+
+                table_name = args[1]
+
+                if table_name not in metadata:
+                    print(f'Ошибка: Таблица "{table_name}" не существует.')
+                    continue
+
+                count = len(load_table_data(table_name))
+
+                print(f"Таблица: {table_name}")
+                print(f"Столбцы: {", ".join(metadata[table_name])}")
+                print(f"Количество записей: {count}")
             case "exit":
                 break
             case "help":
