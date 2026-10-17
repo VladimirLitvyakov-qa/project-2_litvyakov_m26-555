@@ -9,6 +9,9 @@ uv sync
 uv run database
 ```
 
+## Демонстрация
+[Демонстрация в asciinema](https://asciinema.org/a/nNFDaH4arKk8BJtw)
+
 ## Управление таблицами
 
 ### Запуск:
