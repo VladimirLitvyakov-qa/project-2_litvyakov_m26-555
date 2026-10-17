@@ -216,6 +216,9 @@ def run() -> None:
                 ids = [i["ID"] for i in select(table_data, clause)]
                 delete_data = delete(table_data, clause)
 
+                if delete_data is None:
+                    continue
+
                 save_table_data(table_name, delete_data)
                 if len(ids) == 1:
                     print(

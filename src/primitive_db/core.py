@@ -1,4 +1,4 @@
-from decorators import handle_db_errors
+from decorators import confirm_action, handle_db_errors
 from primitive_db.utils import load_table_data
 
 
@@ -40,6 +40,7 @@ def create_table(metadata: dict, table_name: str, columns: list[str]) -> dict | 
     return metadata
 
 
+@confirm_action("удаление таблицы")
 @handle_db_errors
 def drop_table(metadata: dict, table_name: str) -> dict | None:
     """
@@ -47,7 +48,7 @@ def drop_table(metadata: dict, table_name: str) -> dict | None:
 
     :param metadata: словарь с таблицами
     :param table_name: имя таблицы
-    :return: обновленный metadata или None при ошибке
+    :return: обновленный metadata или None при ошибке или отмене
     """
     if not isinstance(metadata, dict):
         raise TypeError(f"metadata must be dict, but got {type(metadata).__name__}")
@@ -170,6 +171,7 @@ def update(table_data: list[dict], set_clause: dict, where_clause: dict) -> list
     return table_data
 
 
+@confirm_action("удаление записи")
 def delete(table_data: list, where_clause: dict) -> list:
     """
     Находит записи по where_clause и удаляет их

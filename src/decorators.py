@@ -1,5 +1,18 @@
-def handle_db_errors(func):
-    def wrapper(*args, **kwargs):
+from collections.abc import Callable
+from functools import wraps
+from typing import Any
+
+
+def handle_db_errors(func: Callable) -> Callable:
+    """
+    Перехватывает ошибки БД и выводит сообщение
+
+    :param func: функция
+    :return: обёрнутая функция
+    """
+
+    @wraps(func)
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
         try:
             return func(*args, **kwargs)
         except FileNotFoundError:
@@ -15,3 +28,25 @@ def handle_db_errors(func):
             print(f"Произошла непредвиденная ошибка: {e}")
 
     return wrapper
+
+
+def confirm_action(action_name: str) -> Callable:
+    """
+    Запрашивает подтверждение перед выполнением функции
+
+    :param action_name: название действия для вопроса
+    :return: декоратор
+    """
+
+    def decorator(func: Callable) -> Callable:
+        @wraps(func)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            answer = input(f'Вы уверены, что хотите выполнить "{action_name}"? [y/n]:')
+            if answer == "y":
+                return func(*args, **kwargs)
+            print("Операция отменена")
+            return None
+
+        return wrapper
+
+    return decorator
