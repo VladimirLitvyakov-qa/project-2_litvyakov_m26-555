@@ -3,7 +3,7 @@ import shlex
 import prompt
 from prettytable import PrettyTable
 
-from primitive_db.core import create_table, drop_table, insert, select, update
+from primitive_db.core import create_table, delete, drop_table, insert, select, update
 from primitive_db.parser import parse_value, parse_where_and_set
 from primitive_db.utils import (
     load_metadata,
@@ -111,7 +111,7 @@ def run() -> None:
                 if table_data:
                     save_table_data(table_name, table_data)
                     print(
-                        f'Запись с ID={table_data[-1]['ID']} успешно добавлена '
+                        f"Запись с ID={table_data[-1]['ID']} успешно добавлена "
                         f'в таблицу "{table_name}".'
                     )
             case "select":
@@ -178,18 +178,54 @@ def run() -> None:
                 ids = [i["ID"] for i in select(table_data, value_where)]
                 update_data = update(table_data, value_set, value_where)
 
-                if update_data:
-                    save_table_data(table_name, table_data)
-                    if len(ids) == 1:
-                        print(f'Запись с ID={ids[0]} в таблице '
-                              f'"{table_name}" успешно обновлена.')
-                    elif len(ids) > 1:
-                        print(
-                            f'Записи с IDs={', '.join(map(str, ids))} в таблице '
-                            f'"{table_name}" успешно обновлены.'
-                        )
+                save_table_data(table_name, update_data)
+                if len(ids) == 1:
+                    print(
+                        f"Запись с ID={ids[0]} в таблице "
+                        f'"{table_name}" успешно обновлена.'
+                    )
+                elif len(ids) > 1:
+                    print(
+                        f"Записи с IDs={', '.join(map(str, ids))} в таблице "
+                        f'"{table_name}" успешно обновлены.'
+                    )
             case "delete":
-                ...
+                if len(args) < 3:
+                    print("Не указано имя таблицы. Попробуйте снова.")
+                    continue
+
+                table_name = args[2]
+
+                if table_name not in metadata:
+                    print(f'Ошибка: Таблица "{table_name}" не существует.')
+                    continue
+
+                table_data = load_table_data(table_name)
+
+                if len(args) < 4 or args[3] != "where":
+                    print("Некорректное значение. Попробуйте снова.")
+                    continue
+
+                start = user_input.find("where ") + len("where ")
+                clause = parse_where_and_set(user_input[start:])
+
+                if clause is None:
+                    continue
+
+                ids = [i["ID"] for i in select(table_data, clause)]
+                delete_data = delete(table_data, clause)
+
+                save_table_data(table_name, delete_data)
+                if len(ids) == 1:
+                    print(
+                        f"Запись с ID={ids[0]} успешно удалена "
+                        f'из таблицы "{table_name}".'
+                    )
+                elif len(ids) > 1:
+                    print(
+                        f"Записи с IDs={', '.join(map(str, ids))} успешно удалены "
+                        f'из таблицы "{table_name}".'
+                    )
             case "info":
                 ...
             case "exit":
