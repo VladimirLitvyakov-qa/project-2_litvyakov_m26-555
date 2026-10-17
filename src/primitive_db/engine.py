@@ -3,7 +3,7 @@ import shlex
 import prompt
 from prettytable import PrettyTable
 
-from primitive_db.core import create_table, drop_table, insert, select
+from primitive_db.core import create_table, drop_table, insert, select, update
 from primitive_db.parser import parse_value, parse_where_and_set
 from primitive_db.utils import (
     load_metadata,
@@ -94,6 +94,7 @@ def run() -> None:
                     print("Не указано имя таблицы. Попробуйте снова.")
                     continue
 
+                table_name = args[2]
                 start = user_input.find("(")
                 end = user_input.find(")")
 
@@ -105,24 +106,26 @@ def run() -> None:
                     parse_value(v.strip())
                     for v in user_input[start + 1 : end].split(",")
                 ]
-                table_data = insert(metadata, args[2], values)
+                table_data = insert(metadata, table_name, values)
 
                 if table_data:
-                    save_table_data(args[2], table_data)
+                    save_table_data(table_name, table_data)
                     print(
-                        f'Запись с ID={table_data[-1]["ID"]} успешно добавлена '
-                        f'в таблицу "{args[2]}".'
+                        f'Запись с ID={table_data[-1]['ID']} успешно добавлена '
+                        f'в таблицу "{table_name}".'
                     )
             case "select":
                 if len(args) < 3:
                     print("Не указано имя таблицы. Попробуйте снова.")
                     continue
 
-                if args[2] not in metadata:
-                    print(f'Ошибка: Таблица "{args[2]}" не существует.')
+                table_name = args[2]
+
+                if table_name not in metadata:
+                    print(f'Ошибка: Таблица "{table_name}" не существует.')
                     continue
 
-                table_data = load_table_data(args[2])
+                table_data = load_table_data(table_name)
 
                 if len(args) > 3 and args[3] == "where":
                     start = user_input.find("where ") + len("where ")
@@ -136,14 +139,55 @@ def run() -> None:
                     result = select(table_data)
 
                 table = PrettyTable()
-                table.field_names = [k[: k.find(":")] for k in metadata[args[2]]]
+                table.field_names = [k[: k.find(":")] for k in metadata[table_name]]
 
                 for row in result:
                     table.add_row(list(row.values()))
 
                 print(table)
             case "update":
-                ...
+                if len(args) < 2:
+                    print("Не указано имя таблицы. Попробуйте снова.")
+                    continue
+
+                table_name = args[1]
+
+                if table_name not in metadata:
+                    print(f'Ошибка: Таблица "{table_name}" не существует.')
+                    continue
+
+                table_data = load_table_data(table_name)
+
+                if len(args) < 7 or args[2] != "set" or args[6] != "where":
+                    print("Некорректное значение. Попробуйте снова.")
+                    continue
+
+                start_set = user_input.find("set ") + len("set ")
+                end_set = user_input.find(" where")
+                value_set = parse_where_and_set(user_input[start_set:end_set])
+
+                if value_set is None:
+                    continue
+
+                start_where = user_input.find("where ") + len("where ")
+                value_where = parse_where_and_set(user_input[start_where:])
+
+                if value_where is None:
+                    continue
+
+                ids = [i["ID"] for i in select(table_data, value_where)]
+                update_data = update(table_data, value_set, value_where)
+
+                if update_data:
+                    save_table_data(table_name, table_data)
+                    if len(ids) == 1:
+                        print(f'Запись с ID={ids[0]} в таблице '
+                              f'"{table_name}" успешно обновлена.')
+                    elif len(ids) > 1:
+                        print(
+                            f'Записи с IDs={', '.join(map(str, ids))} в таблице '
+                            f'"{table_name}" успешно обновлены.'
+                        )
             case "delete":
                 ...
             case "info":
