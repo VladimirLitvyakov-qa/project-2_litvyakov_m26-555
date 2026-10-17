@@ -1,5 +1,7 @@
 import json
-from pathlib import Path
+import os
+
+from primitive_db.constants import DATA_DIR
 
 
 def load_metadata(filepath: str) -> dict:
@@ -49,7 +51,7 @@ def load_table_data(table_name: str) -> list:
         )
 
     try:
-        with open(f"./data/{table_name}.json", encoding="utf-8") as f:
+        with open(f"./{DATA_DIR}/{table_name}.json", encoding="utf-8") as f:
             return json.load(f)
     except FileNotFoundError:
         return []
@@ -70,7 +72,6 @@ def save_table_data(table_name: str, data: list) -> None:
     if not isinstance(data, list):
         raise TypeError(f"data must be list, but got {type(data).__name__}")
 
-    folder_path = Path("data")
-    folder_path.mkdir(parents=True, exist_ok=True)
-    with open(f"./data/{table_name}.json", "w", encoding="utf-8") as f:
+    os.makedirs(DATA_DIR, exist_ok=True)
+    with open(f"./{DATA_DIR}/{table_name}.json", "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)

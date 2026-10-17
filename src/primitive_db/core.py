@@ -1,3 +1,4 @@
+from primitive_db.constants import ID_COLUMN, VALID_TYPES
 from primitive_db.decorators import (
     confirm_action,
     create_cacher,
@@ -37,7 +38,7 @@ def create_table(metadata: dict, table_name: str, columns: list[str]) -> dict | 
             raise TypeError(f"colum must be str, but got {type(colum).__name__}")
 
         i = colum.find(":")
-        if colum[i + 1 :] not in ("int", "str", "bool") or i == -1:
+        if colum[i + 1 :] not in VALID_TYPES or i == -1:
             raise ValueError(f"некорректное значение: {colum}. Попробуйте снова.")
 
     if "ID:int" not in columns:
@@ -104,13 +105,13 @@ def insert(metadata: dict, table_name: str, values: list) -> list | None:
         new_row[table_value[:i]] = value
 
     table_data = load_table_data(table_name)
-    ids = [data["ID"] for data in table_data]
+    ids = [data[ID_COLUMN] for data in table_data]
     if table_data:
         new_id = max(ids) + 1
     else:
         new_id = 1
 
-    result_row = {"ID": new_id} | new_row
+    result_row = {ID_COLUMN: new_id} | new_row
     table_data.append(result_row)
     return table_data
 

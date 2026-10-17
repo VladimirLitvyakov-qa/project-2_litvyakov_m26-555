@@ -3,6 +3,7 @@ import shlex
 import prompt
 from prettytable import PrettyTable
 
+from primitive_db.constants import ID_COLUMN, META_FILE
 from primitive_db.core import create_table, delete, drop_table, insert, select, update
 from primitive_db.parser import parse_value, parse_where_and_set
 from primitive_db.utils import (
@@ -11,8 +12,6 @@ from primitive_db.utils import (
     save_metadata,
     save_table_data,
 )
-
-PATH = "db_meta.json"
 
 
 def print_help() -> None:
@@ -55,7 +54,7 @@ def run() -> None:
     print_help()
 
     while True:
-        metadata = load_metadata(PATH)
+        metadata = load_metadata(META_FILE)
         user_input = prompt.string(">>>Введите команду: ")
 
         try:
@@ -75,7 +74,7 @@ def run() -> None:
                     continue
                 upd_data = create_table(metadata, args[1], args[2:])
                 if upd_data is not None:
-                    save_metadata(PATH, upd_data)
+                    save_metadata(META_FILE, upd_data)
                     col = ", ".join(metadata[args[1]])
                     print(f'Таблица "{args[1]}" успешно создана со столбцами: {col}')
             case "list_tables":
@@ -91,7 +90,7 @@ def run() -> None:
                     continue
                 upd_data = drop_table(metadata, args[1])
                 if upd_data is not None:
-                    save_metadata(PATH, upd_data)
+                    save_metadata(META_FILE, upd_data)
                     save_table_data(args[1], [])
                     print(f'Таблица "{args[1]}" успешно удалена.')
             case "insert":
@@ -183,7 +182,7 @@ def run() -> None:
                 if value_where is None:
                     continue
 
-                ids = [i["ID"] for i in select(table_data, value_where)]
+                ids = [i[ID_COLUMN] for i in select(table_data, value_where)]
                 update_data = update(table_data, value_set, value_where)
 
                 if update_data is None:
@@ -223,7 +222,7 @@ def run() -> None:
                 if clause is None:
                     continue
 
-                ids = [i["ID"] for i in select(table_data, clause)]
+                ids = [i[ID_COLUMN] for i in select(table_data, clause)]
                 delete_data = delete(table_data, clause)
 
                 if delete_data is None:
