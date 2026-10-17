@@ -1,6 +1,8 @@
+from decorators import handle_db_errors
 from primitive_db.utils import load_table_data
 
 
+@handle_db_errors
 def create_table(metadata: dict, table_name: str, columns: list[str]) -> dict | None:
     """
     Обновляет словарь с метаданными
@@ -21,8 +23,7 @@ def create_table(metadata: dict, table_name: str, columns: list[str]) -> dict | 
 
     for table in metadata:
         if table_name == table:
-            print(f'Ошибка: Таблица "{table_name}" уже существует.')
-            return None
+            raise ValueError(f'Таблица "{table_name}" уже существует.')
 
     for colum in columns:
         if not isinstance(colum, str):
@@ -30,8 +31,7 @@ def create_table(metadata: dict, table_name: str, columns: list[str]) -> dict | 
 
         i = colum.find(":")
         if colum[i + 1 :] not in ("int", "str", "bool") or i == -1:
-            print(f"Некорректное значение: {colum}. Попробуйте снова.")
-            return None
+            raise ValueError(f"Некорректное значение: {colum}. Попробуйте снова.")
 
     if "ID:int" not in columns:
         columns.insert(0, "ID:int")
@@ -40,6 +40,7 @@ def create_table(metadata: dict, table_name: str, columns: list[str]) -> dict | 
     return metadata
 
 
+@handle_db_errors
 def drop_table(metadata: dict, table_name: str) -> dict | None:
     """
     Удаляет информацию о таблице
@@ -55,13 +56,13 @@ def drop_table(metadata: dict, table_name: str) -> dict | None:
         raise TypeError(f"table_name must be str, but got {type(table_name).__name__}")
 
     if table_name not in metadata:
-        print(f'Ошибка: Таблица "{table_name}" не существует.')
-        return None
+        raise KeyError(table_name)
 
     del metadata[table_name]
     return metadata
 
 
+@handle_db_errors
 def insert(metadata: dict, table_name: str, values: list) -> list | None:
     """
     Добавляет новую запись в таблицу
@@ -81,19 +82,16 @@ def insert(metadata: dict, table_name: str, values: list) -> list | None:
         raise TypeError(f"values must be list, but got {type(values).__name__}")
 
     if table_name not in metadata:
-        print(f'Ошибка: Таблица "{table_name}" не существует.')
-        return None
+        raise KeyError(table_name)
 
     if len(values) + 1 != len(metadata[table_name]):
-        print(f"Некорректное значение: {values}. Попробуйте снова.")
-        return None
+        raise ValueError(f"Некорректное значение: {values}. Попробуйте снова.")
 
     new_row = {}
     for table_value, value in zip(metadata[table_name][1:], values):
         i = table_value.find(":")
         if table_value[i + 1 :] != type(value).__name__:
-            print(f"Некорректное значение: {value}. Попробуйте снова.")
-            return None
+            raise ValueError(f"Некорректное значение: {value}. Попробуйте снова.")
         new_row[table_value[:i]] = value
 
     table_data = load_table_data(table_name)
@@ -108,6 +106,7 @@ def insert(metadata: dict, table_name: str, values: list) -> list | None:
     return table_data
 
 
+@handle_db_errors
 def select(table_data: list[dict], where_clause: dict = None) -> list[dict] | None:
     """
     Возвращает данные по условию where_clause, если данные отсутствуют,
@@ -129,8 +128,7 @@ def select(table_data: list[dict], where_clause: dict = None) -> list[dict] | No
         )
 
     if len(where_clause) > 1:
-        print(f"Некорректное значение: {where_clause}. Попробуйте снова.")
-        return None
+        raise ValueError(f"Некорректное значение: {where_clause}. Попробуйте снова.")
 
     result = []
     for data in table_data:
