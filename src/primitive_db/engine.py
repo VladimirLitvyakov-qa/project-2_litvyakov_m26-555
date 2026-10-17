@@ -143,6 +143,9 @@ def run() -> None:
                 else:
                     result = select(table_data)
 
+                if result is None:
+                    continue
+
                 table = PrettyTable()
                 table.field_names = [k[: k.find(":")] for k in metadata[table_name]]
 
@@ -182,6 +185,9 @@ def run() -> None:
 
                 ids = [i["ID"] for i in select(table_data, value_where)]
                 update_data = update(table_data, value_set, value_where)
+
+                if update_data is None:
+                    continue
 
                 save_table_data(table_name, update_data)
                 if len(ids) == 1:

@@ -150,7 +150,10 @@ def select(table_data: list[dict], where_clause: dict = None) -> list[dict] | No
     return cacher(cache_key, filter_data)
 
 
-def update(table_data: list[dict], set_clause: dict, where_clause: dict) -> list[dict]:
+@handle_db_errors
+def update(
+    table_data: list[dict], set_clause: dict, where_clause: dict
+) -> list[dict] | None:
     """
     Находит записи по условию where_clause и обновляет в
     найденных записях поля согласно set_clause
@@ -158,7 +161,7 @@ def update(table_data: list[dict], set_clause: dict, where_clause: dict) -> list
     :param table_data: таблица с данными
     :param set_clause: данные для обновления
     :param where_clause: условия выборки
-    :return: таблица с данными
+    :return: таблица с данными или None
     """
     if not isinstance(table_data, list):
         raise TypeError(f"table_data must be list, but got {type(table_data).__name__}")
@@ -182,13 +185,14 @@ def update(table_data: list[dict], set_clause: dict, where_clause: dict) -> list
 
 
 @confirm_action("удаление записи")
-def delete(table_data: list, where_clause: dict) -> list:
+@handle_db_errors
+def delete(table_data: list, where_clause: dict) -> list | None:
     """
     Находит записи по where_clause и удаляет их
 
     :param table_data: таблица с данными
     :param where_clause: условия для выборки
-    :return: таблица с данными
+    :return: таблица с данными или None
     """
     if not isinstance(table_data, list):
         raise TypeError(f"table_data must be list, but got {type(table_data).__name__}")
