@@ -71,3 +71,31 @@ def log_time(func: Callable) -> Callable:
         return result
 
     return wrapper
+
+
+def create_cacher() -> Callable:
+    """
+    Создает кэш
+
+    :return: функцию cache_result
+    """
+
+    cache = {}
+
+    def cache_result(key: Any, value_func: Callable) -> Any:
+        """
+        Возвращает значение из кэша или вычисляет и сохраняет его
+
+        :param key: ключ
+        :param value_func: функция, которая вычисляет результат
+        :return: значение из кэша или результат value_func
+        """
+        if key in cache:
+            return cache[key]
+
+        result = value_func()
+        cache[key] = result
+
+        return result
+
+    return cache_result

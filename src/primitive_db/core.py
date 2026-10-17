@@ -1,5 +1,7 @@
-from decorators import confirm_action, handle_db_errors, log_time
+from decorators import confirm_action, create_cacher, handle_db_errors, log_time
 from primitive_db.utils import load_table_data
+
+cacher = create_cacher()
 
 
 @handle_db_errors
@@ -23,7 +25,7 @@ def create_table(metadata: dict, table_name: str, columns: list[str]) -> dict | 
 
     for table in metadata:
         if table_name == table:
-            raise ValueError(f'Таблица "{table_name}" уже существует.')
+            raise ValueError(f'таблица "{table_name}" уже существует.')
 
     for colum in columns:
         if not isinstance(colum, str):
@@ -31,7 +33,7 @@ def create_table(metadata: dict, table_name: str, columns: list[str]) -> dict | 
 
         i = colum.find(":")
         if colum[i + 1 :] not in ("int", "str", "bool") or i == -1:
-            raise ValueError(f"Некорректное значение: {colum}. Попробуйте снова.")
+            raise ValueError(f"некорректное значение: {colum}. Попробуйте снова.")
 
     if "ID:int" not in columns:
         columns.insert(0, "ID:int")
@@ -87,13 +89,13 @@ def insert(metadata: dict, table_name: str, values: list) -> list | None:
         raise KeyError(table_name)
 
     if len(values) + 1 != len(metadata[table_name]):
-        raise ValueError(f"Некорректное значение: {values}. Попробуйте снова.")
+        raise ValueError(f"некорректное значение: {values}. Попробуйте снова.")
 
     new_row = {}
     for table_value, value in zip(metadata[table_name][1:], values):
         i = table_value.find(":")
         if table_value[i + 1 :] != type(value).__name__:
-            raise ValueError(f"Некорректное значение: {value}. Попробуйте снова.")
+            raise ValueError(f"некорректное значение: {value}. Попробуйте снова.")
         new_row[table_value[:i]] = value
 
     table_data = load_table_data(table_name)
@@ -131,15 +133,21 @@ def select(table_data: list[dict], where_clause: dict = None) -> list[dict] | No
         )
 
     if len(where_clause) > 1:
-        raise ValueError(f"Некорректное значение: {where_clause}. Попробуйте снова.")
+        raise ValueError(f"некорректное значение: {where_clause}. Попробуйте снова.")
 
-    result = []
-    for data in table_data:
-        for key, value in where_clause.items():
-            if data.get(key) == value:
-                result.append(data)
+    cache_key = f"{table_data}{where_clause}"
 
-    return result
+    def filter_data() -> list[dict]:
+        """Фильтрует записи по условию where_clause"""
+        result = []
+        for data in table_data:
+            for key, value in where_clause.items():
+                if data.get(key) == value:
+                    result.append(data)
+
+        return result
+
+    return cacher(cache_key, filter_data)
 
 
 def update(table_data: list[dict], set_clause: dict, where_clause: dict) -> list[dict]:
