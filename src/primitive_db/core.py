@@ -1,4 +1,9 @@
-from decorators import confirm_action, create_cacher, handle_db_errors, log_time
+from primitive_db.decorators import (
+    confirm_action,
+    create_cacher,
+    handle_db_errors,
+    log_time,
+)
 from primitive_db.utils import load_table_data
 
 cacher = create_cacher()
