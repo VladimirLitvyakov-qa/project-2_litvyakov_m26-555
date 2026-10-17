@@ -88,6 +88,7 @@ def run() -> None:
                 upd_data = drop_table(metadata, args[1])
                 if upd_data is not None:
                     save_metadata(PATH, upd_data)
+                    save_table_data(args[1], [])
                     print(f'Таблица "{args[1]}" успешно удалена.')
             case "insert":
                 if len(args) < 3:
