@@ -20,9 +20,9 @@ def parse_where_and_set(condition: str) -> dict | None:
 
     if value[0] == '"' and value[-1] == '"':
         value = value[1:-1]
-    elif value == "True":
+    elif value.lower() == "true":
         value = True
-    elif value == "False":
+    elif value.lower() == "false":
         value = False
     else:
         try:
@@ -49,9 +49,9 @@ def parse_value(value: str) -> str | int | bool | None:
 
     if value[0] == '"' and value[-1] == '"':
         value = value[1:-1]
-    elif value == "True":
+    elif value.lower() == "true":
         value = True
-    elif value == "False":
+    elif value.lower() == "false":
         value = False
     else:
         try:

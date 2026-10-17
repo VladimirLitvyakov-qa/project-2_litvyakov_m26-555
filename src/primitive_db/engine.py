@@ -241,7 +241,7 @@ def run() -> None:
                 count = len(load_table_data(table_name))
 
                 print(f"Таблица: {table_name}")
-                print(f"Столбцы: {", ".join(metadata[table_name])}")
+                print(f"Столбцы: {', '.join(metadata[table_name])}")
                 print(f"Количество записей: {count}")
             case "exit":
                 break
